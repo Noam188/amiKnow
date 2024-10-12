@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RNA to Protein Translator</title>
+  <style>
+    body {
+      font-family: 'Helvetica', sans-serif;
+      background: linear-gradient(to right, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url('https://media.istockphoto.com/id/1151886480/vector/dna-pattern.jpg?s=612x612&w=0&k=20&c=XzBaZg3e_BNios3Cga917AjBmu5fRV42n2Pu4oxLx0E=');
+      background-size: 200px 200px;
+      background-repeat: repeat;
+      background-attachment: fixed;
+      background-position: 0 0;
+      background-transform: rotate(45deg);
+      text-align: center;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #333;
+      margin-top: 20px;
+    }
+
+    .attribution {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 14px;
+      color: #555;
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 5px 10px;
+      border-radius: 8px;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+      font-weight: bold;
+      text-align: right;
+      line-height: 1.5;
+    }
+
+    textarea {
+      width: 300px;
+      height: 100px;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 12px 25px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .result {
+      margin-top: 20px;
+      font-size: 18px;
+      padding: 15px;
+      border-radius: 8px;
+      display: inline-block;
+      background-color: rgba(255, 255, 255, 0);
+      box-shadow: 0px 0px 0px rgba(0, 0, 0, 0);
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .info-container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      margin-top: 20px;
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+      max-width: 80%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    img {
+      max-width: 45%;
+      height: auto;
+      margin-right: 20px;
+      border-radius: 8px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .info-text {
+      font-size: 18px; /* Increased font size */
+      max-width: 500px;
+      text-align: left;
+    }
+
+    .process-explanation {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="attribution">
+    Created by Noam Elyashiv<br>
+    Contributions by Aviv Hoitash
+  </div>
+
+  <h1>RNA to Protein Translator</h1>
+  
+  <p>Enter an mRNA sequence:</p>
+  <textarea id="rnaInput" placeholder="Enter mRNA sequence (e.g., AUG GGU CCU)"></textarea><br>
+  
+  <button onclick="translateRNA()">Translate</button>
+
+  <div class="result" id="result"></div> <!-- Response box -->
+
+  <div class="info-container">
+    <img src="https://microbenotes.com/wp-content/uploads/2023/09/Amino-Acid-Codon-Wheel-scaled.jpeg" alt="Codon Wheel Diagram">
+    <div class="info-text">
+      <p><strong>Input Type:</strong></p>
+      <p><strong>mRNA:</strong> The messenger RNA is the template for protein synthesis and is directly translated into protein.</p>
+      <p><strong>Protein Synthesis:</strong></p>
+      <p>The central dogma of molecular biology explains the flow of genetic information within a biological system. It describes how DNA is transcribed into RNA, which is then translated into proteins. This process is essential for the expression of genes and the functioning of living organisms.</p>
+      <p class="process-explanation">RNA (ribonucleic acid) acts as a messenger between DNA and ribosomes to make proteins. During transcription, a DNA sequence is converted into mRNA. This mRNA is then translated into amino acids by ribosomes. Each set of three bases in mRNA (called a codon) corresponds to a specific amino acid, and the codons are read in sequence until a "stop" codon is reached, marking the end of translation.</p>
+    </div>
+  </div>
+
+  <script>
+    // Genetic code table
+    const codonTable = {
+  'AUG': 'Methionine (Met, Start)',
+  'UUU': 'Phenylalanine (Phe)',
+  'UUC': 'Phenylalanine (Phe)',
+  'UUA': 'Leucine (Leu)',
+  'UUG': 'Leucine (Leu)',
+  'UCU': 'Serine (Ser)',
+  'UCC': 'Serine (Ser)',
+  'UCA': 'Serine (Ser)',
+  'UCG': 'Serine (Ser)',
+  'UAU': 'Tyrosine (Tyr)',
+  'UAC': 'Tyrosine (Tyr)',
+  'UGU': 'Cysteine (Cys)',
+  'UGC': 'Cysteine (Cys)',
+  'UGG': 'Tryptophan (Trp)',
+  'UAA': 'Stop',
+  'UAG': 'Stop',
+  'UGA': 'Stop',
+  'AUA': 'Isoleucine (Ile)',
+  'AUC': 'Isoleucine (Ile)',
+  'AUU': 'Isoleucine (Ile)',
+  'ACA': 'Threonine (Thr)',
+  'ACC': 'Threonine (Thr)',
+  'ACG': 'Threonine (Thr)',
+  'ACU': 'Threonine (Thr)',
+  'CCA': 'Proline (Pro)',
+  'CCU': 'Proline (Pro)',
+  'CCG': 'Proline (Pro)',
+  'CCC': 'Proline (Pro)',
+  'GUA': 'Valine (Val)',
+  'GUC': 'Valine (Val)',
+  'GUG': 'Valine (Val)',
+  'GUU': 'Valine (Val)',
+  'CGA': 'Arginine (Arg)',
+  'CGC': 'Arginine (Arg)',
+  'CGG': 'Arginine (Arg)',
+  'CGU': 'Arginine (Arg)',
+  'AGA': 'Arginine (Arg)',
+  'AGG': 'Arginine (Arg)',
+  'GAA': 'Glutamic Acid (Glu)',
+  'GAC': 'Aspartic Acid (Asp)',
+  'GCA': 'Alanine (Ala)',
+  'GCC': 'Alanine (Ala)',
+  'GCG': 'Alanine (Ala)',
+  'GCU': 'Alanine (Ala)',
+  'GGA': 'Glycine (Gly)',
+  'GGC': 'Glycine (Gly)',
+  'GGG': 'Glycine (Gly)',
+  'GGU': 'Glycine (Gly)',
+  'CAA': 'Glutamine (Gln)',
+  'CAG': 'Glutamine (Gln)',
+  'AAA': 'Lysine (Lys)',
+  'AAG': 'Lysine (Lys)',
+  'CAC': 'Histidine (His)',
+  'CAU': 'Histidine (His)',
+  'CGA': 'Arginine (Arg)',
+  'CUG': 'Leucine (Leu)',
+  'AUC': 'Isoleucine (Ile)',
+};
+
+    function translateRNA() {
+      const input = document.getElementById("rnaInput").value.trim();
+      const resultBox = document.getElementById("result");
+      let translatedProtein = '';
+
+      // Normalize the input (replace dashes with spaces)
+      const normalizedInput = input.replace(/-/g, ' ').replace(/\s+/g, ' '); // replace multiple spaces with a single space
+      const codons = normalizedInput.split(' ');
+
+      for (const codon of codons) {
+        if (codonTable[codon]) {
+          translatedProtein += codonTable[codon] + ' ';
+        } else {
+          translatedProtein += `Invalid codon (${codon}) `;
+        }
+      }
+
+      resultBox.innerText = translatedProtein.trim();
+    }
+  </script>
+</body>
+</html>
